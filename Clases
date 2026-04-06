@@ -1,0 +1,415 @@
+@startuml
+
+
+title Sistema de Gestión Bancaria — Diagrama de Clases
+
+
+interface Consultable <<interface>> {
+    + obtenerResumen() : String
+    + estaActivo() : boolean
+    + obtenerTipo() : String
+}
+
+interface Transaccionable <<interface>> {
+    + depositar(monto: double) : void
+    + retirar(monto: double) : void
+    + calcularComision(monto: double) : double
+    + consultarSaldo() : double
+}
+
+interface Auditable <<interface>> {
+    + obtenerFechaCreacion() : LocalDateTime
+    + obtenerUltimaModificacion() : LocalDateTime
+    + obtenerUsuarioModificacion() : String
+    + registrarModificacion(usuario: String) : void
+}
+
+interface Notificable <<interface>> {
+    + notificar(mensaje: String) : void
+    + obtenerContacto() : String
+    + aceptaNotificaciones() : boolean
+}
+
+
+enum EstadoTransaccion {
+    PENDIENTE
+    PROCESANDO
+    COMPLETADA
+    RECHAZADA
+    REVERTIDA
+    + puedeTransicionarA(destino: EstadoTransaccion) : boolean
+}
+
+enum TipoCuenta {
+    CORRIENTE
+    AHORROS
+    CREDITO
+}
+
+enum Turno {
+    MAÑANA
+    TARDE
+    NOCHE
+}
+
+enum TipoDocumento {
+    CEDULA
+    PASAPORTE
+    NIT
+    CEDULA_EXTRANJERIA
+}
+
+
+class SistemaBancarioException <<Exception>> {
+    - codigoError : String
+    - timestamp : LocalDateTime
+    + getCodigoError() : String
+    + getTimestamp() : LocalDateTime
+    + toString() : String
+}
+
+class SaldoInsuficienteException {
+    - saldoActual : double
+    - montoSolicitado : double
+    + getSaldoActual() : double
+    + getMontoSolicitado() : double
+    + toString() : String
+}
+
+class CuentaBloqueadaException {
+}
+
+class ClienteNoEncontradoException {
+    - idCliente : String
+    + getIdCliente() : String
+}
+
+class CapacidadExcedidaException {
+    - capacidadMaxima : int
+    + getCapacidadMaxima() : int
+}
+
+class BancoRuntimeException <<RuntimeException>> {
+}
+
+class DatoInvalidoException {
+    - campo : String
+    - valorRecibido : Object
+    + getCampo() : String
+    + getValorRecibido() : Object
+    + toString() : String
+}
+
+class EstadoTransaccionInvalidoException {
+}
+
+class PermisoInsuficienteException {
+}
+
+SistemaBancarioException <|-- SaldoInsuficienteException
+SistemaBancarioException <|-- CuentaBloqueadaException
+SistemaBancarioException <|-- ClienteNoEncontradoException
+SistemaBancarioException <|-- CapacidadExcedidaException
+BancoRuntimeException <|-- DatoInvalidoException
+BancoRuntimeException <|-- EstadoTransaccionInvalidoException
+BancoRuntimeException <|-- PermisoInsuficienteException
+
+abstract class Persona {
+    - id : String
+    - nombre : String
+    - apellido : String
+    - fechaNacimiento : LocalDate
+    - email : String
+    + getNombreCompleto() : String
+    + {abstract} calcularEdad() : int
+    + {abstract} obtenerTipo() : String
+    + {abstract} obtenerDocumentoIdentidad() : String
+    + getId() : String
+    + setId(id: String) : void
+    + getNombre() : String
+    + setNombre(nombre: String) : void
+    + getApellido() : String
+    + setApellido(apellido: String) : void
+    + getEmail() : String
+    + setEmail(email: String) : void
+    + getFechaNacimiento() : LocalDate
+    + setFechaNacimiento(fecha: LocalDate) : void
+}
+
+abstract class Empleado {
+    - legajo : String
+    - fechaContratacion : LocalDate
+    - salarioBase : double
+    - activo : boolean
+    + calcularAntigüedad() : int
+    + calcularEdad() : int
+    + {abstract} calcularSalario() : double
+    + {abstract} calcularBono() : double
+    + getLegajo() : String
+    + getSalarioBase() : double
+    + isActivo() : boolean
+}
+
+abstract class Cliente {
+    - cuentas : Cuenta[5]
+    - totalCuentas : int
+    - activo : boolean
+    + agregarCuenta(cuenta: Cuenta) : void
+    + getCuentas() : Cuenta[]
+    + getTotalCuentas() : int
+    + calcularEdad() : int
+    + isActivo() : boolean
+}
+
+Persona <|-- Empleado
+Persona <|-- Cliente
+
+class Cajero {
+    - turno : Turno
+    - sucursalAsignada : String
+    - transaccionesDia : int
+    - fechaCreacion : LocalDateTime
+    - ultimaModificacion : LocalDateTime
+    - usuarioModificacion : String
+    + calcularSalario() : double
+    + calcularBono() : double
+    + obtenerTipo() : String
+    + obtenerDocumentoIdentidad() : String
+    + registrarTransaccion() : void
+    + reiniciarContadorDiario() : void
+    + obtenerResumen() : String
+    + estaActivo() : boolean
+    + registrarModificacion(usuario: String) : void
+}
+
+class AsesorFinanciero {
+    - comisionBase : double
+    - metasMensuales : double
+    - ventasMes : double
+    - clientesAsignados : Cliente[20]
+    - totalClientes : int
+    - fechaCreacion : LocalDateTime
+    - ultimaModificacion : LocalDateTime
+    - usuarioModificacion : String
+    + calcularSalario() : double
+    + calcularBono() : double
+    + obtenerTipo() : String
+    + obtenerDocumentoIdentidad() : String
+    + asignarCliente(cliente: Cliente) : void
+    + registrarVenta(monto: double) : void
+    + obtenerResumen() : String
+    + estaActivo() : boolean
+}
+
+class GerenteSucursal {
+    - sucursal : String
+    - presupuestoAnual : double
+    - empleadosACargo : Empleado[30]
+    - totalEmpleados : int
+    - fechaCreacion : LocalDateTime
+    - ultimaModificacion : LocalDateTime
+    - usuarioModificacion : String
+    + calcularSalario() : double
+    + calcularBono() : double
+    + obtenerTipo() : String
+    + obtenerDocumentoIdentidad() : String
+    + aprobarCredito(solicitante: Empleado, numeroCuenta: String, monto: double) : void
+    + agregarEmpleado(empleado: Empleado) : void
+    + obtenerResumen() : String
+    + estaActivo() : boolean
+}
+
+Empleado <|-- Cajero
+Empleado <|-- AsesorFinanciero
+Empleado <|-- GerenteSucursal
+
+Cajero ..|> Consultable
+Cajero ..|> Auditable
+AsesorFinanciero ..|> Consultable
+AsesorFinanciero ..|> Auditable
+GerenteSucursal ..|> Consultable
+GerenteSucursal ..|> Auditable
+class ClienteNatural {
+    - tipoDocumento : TipoDocumento
+    - numeroDocumento : String
+    - telefono : String
+    - notificacionesActivas : boolean
+    - fechaCreacion : LocalDateTime
+    - ultimaModificacion : LocalDateTime
+    - usuarioModificacion : String
+    + obtenerTipo() : String
+    + obtenerDocumentosIdentidad() : String
+    + obtenerResumen() : String
+    + estaActivo() : boolean
+    + notificar(mensaje: String) : void
+    + obtenerContacto() : String
+    + aceptaNotificaciones() : boolean
+    + registrarModificacion(usuario: String) : void
+}
+
+class ClienteEmpresarial {
+    - nit : String
+    - razonSocial : String
+    - representanteLegal : String
+    - emailContacto : String
+    - notificacionesActivas : boolean
+    - fechaCreacion : LocalDateTime
+    - ultimaModificacion : LocalDateTime
+    - usuarioModificacion : String
+    + obtenerTipo() : String
+    + obtenerDocumentoIdentidad() : String
+    + obtenerResumen() : String
+    + estaActivo() : boolean
+    + notificar(mensaje: String) : void
+    + obtenerContacto() : String
+    + aceptaNotificaciones() : boolean
+    + registrarModificacion(usuario: String) : void
+}
+
+Cliente <|-- ClienteNatural
+Cliente <|-- ClienteEmpresarial
+
+ClienteNatural ..|> Consultable
+ClienteNatural ..|> Notificable
+ClienteNatural ..|> Auditable
+ClienteEmpresarial ..|> Consultable
+ClienteEmpresarial ..|> Notificable
+ClienteEmpresarial ..|> Auditable
+
+
+abstract class Cuenta {
+    - numeroCuenta : String
+    - saldo : double
+    - bloqueada : boolean
+    - fechaCreacion : LocalDateTime
+    - ultimaModificacion : LocalDateTime
+    - usuarioModificacion : String
+    - historial : Transaccion[20]
+    - totalTransacciones : int
+    + verificarBloqueada() : void
+    + agregarAlHistorial(t: Transaccion) : void
+    + getHistorial() : Transaccion[]
+    + {abstract} calcularInteres() : double
+    + {abstract} getLimiteRetiro() : double
+    + {abstract} getTipoCuenta() : String
+    + {abstract} obtenerTipo() : String
+    + getNumeroCuenta() : String
+    + getSaldo() : double
+    + isBloqueada() : boolean
+    + registrarModificacion(usuario: String) : void
+}
+
+Cuenta ..|> Auditable
+
+class CuentaAhorros {
+    - tasaInteres : double
+    - retirosMesActual : int
+    - maxRetirosMes : int
+    + calcularInteres() : double
+    + getLimiteRetiro() : double
+    + getTipoCuenta() : String
+    + depositar(monto: double) : void
+    + retirar(monto: double) : void
+    + calcularComision(monto: double) : double
+    + consultarSaldo() : double
+    + obtenerResumen() : String
+    + estaActivo() : boolean
+    + obtenerTipo() : String
+    + reiniciarRetirosMensuales() : void
+}
+
+class CuentaCorriente {
+    - montoSobregiro : double
+    - comisionMantenimiento : double
+    + calcularInteres() : double
+    + getLimiteRetiro() : double
+    + getTipoCuenta() : String
+    + depositar(monto: double) : void
+    + retirar(monto: double) : void
+    + calcularComision(monto: double) : double
+    + consultarSaldo() : double
+    + obtenerResumen() : String
+    + estaActivo() : boolean
+    + obtenerTipo() : String
+    + cobrarMantenimiento() : void
+}
+
+class CuentaCredito {
+    - limiteCredito : double
+    - tasaInteres : double
+    - deudaActual : double
+    + calcularInteres() : double
+    + getLimiteRetiro() : double
+    + getTipoCuenta() : String
+    + depositar(monto: double) : void
+    + retirar(monto: double) : void
+    + calcularComision(monto: double) : double
+    + consultarSaldo() : double
+    + obtenerResumen() : String
+    + estaActivo() : boolean
+    + obtenerTipo() : String
+}
+
+Cuenta <|-- CuentaAhorros
+Cuenta <|-- CuentaCorriente
+Cuenta <|-- CuentaCredito
+
+CuentaAhorros ..|> Consultable
+CuentaAhorros ..|> Transaccionable
+CuentaCorriente ..|> Consultable
+CuentaCorriente ..|> Transaccionable
+CuentaCredito ..|> Consultable
+CuentaCredito ..|> Transaccionable
+
+class Transaccion {
+    - id : String
+    - monto : double
+    - estado : EstadoTransaccion
+    - fecha : LocalDateTime
+    - descripcion : String
+    + cambiarEstado(nuevo: EstadoTransaccion) : void
+    + generarComprobante() : String
+    + getId() : String
+    + getMonto() : double
+    + getEstado() : EstadoTransaccion
+}
+
+Transaccion --> Cuenta : cuentaOrigen
+Transaccion --> Cuenta : cuentaDestino
+Transaccion --> EstadoTransaccion
+
+
+class Banco {
+    - nombre : String
+    - empleados : Empleado[50]
+    - clientes : Cliente[200]
+    - cuentas : Cuenta[500]
+    - totalEmpleados : int
+    - totalClientes : int
+    - totalCuentas : int
+    - fechaCreacion : LocalDateTime
+    - ultimaModificacion : LocalDateTime
+    - usuarioModificacion : String
+    + registrarCliente(c: Cliente) : void
+    + registrarEmpleado(e: Empleado) : void
+    + abrirCuenta(idCliente: String, c: Cuenta) : void
+    + buscarCliente(id: String) : Cliente
+    + calcularNominaTotal() : double
+    + calcularInteresesMensuales() : void
+    + registrarModificacion(usuario: String) : void
+}
+
+Banco ..|> Auditable
+Banco "1" o-- "0..2" Cliente : clientes
+Banco "1" o-- "0..5" Empleado : empleados
+Banco "1" o-- "0..5" Cuenta : cuentas
+
+
+Cliente "1" *-- "0..5" Cuenta : cuentas
+AsesorFinanciero "1" o-- "0..2" Cliente : clientesAsignados
+GerenteSucursal "1" o-- "0..3" Empleado : empleadosACargo
+Cuenta "1" *-- "0..2" Transaccion : historial
+
+ClienteNatural --> TipoDocumento
+Cajero --> Turno
+@enduml
