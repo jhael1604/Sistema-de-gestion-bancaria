@@ -72,7 +72,8 @@ A continuación se listan **todas** las historias de usuario del sistema. Cada h
 |**HU-15**| Como **Cliente**, quiero recibir notificacciones de mis movimientos bancarios para estar informado todo el tiempo | - notificar() imprime el mensaje si aceptaNotificacion() es verdadero - Si las notificaciones estan desactivadas, el sistema lo indica sin enviar mensaje - Se activa automaticamente en deposito, retiro y transferecia | **Medio** | 3 |
 |**HU-16**| Como **Cliente**, quiero consultar el saldo disponible de mis cuentas para conocer mi situacion financiera | -consultarSaldo() retonra el saldo disponible segun el tipo de cuenta | **Medio** | | 3 |
 |**HU-17**| Como **Cliente**, quiero consultar el historial de transacciones de mis cuentas para revisar mis movimientos | - Cada cuenta almacena maximo 20 transacciones en array estatico - Lanza CapacidadExcedudaException si el historial esta lleno  | **Medio** | 5 |
-
+|**HU-18**| Como **Sistema auditor**, Quiero consultar la fecha de creacion de cualquier entidad | -obtenerFechaCreacion() retorna la fecha exacta de creacion - Disponible en clientes, cuentas, empleados y el banco - la fecha se asigna automaticamente al crear la entidad y no puede modificarse | **Alta** | 3 |
+|**HU-19**| Como **Sistema auditor**, quiero consultar la ultima modificacion de una entidad para detectar camnoos no autorizados | -obtenerUltimaModificacion() retorna la fecha exacta de la modificacion -obtenerUsuarioModificacion() retorna el legajo del usuario responsable | **Alta** | 5 |
 ## 🏗️ Requisitos de Diseño UML
 
 ### 1. Diagrama de Casos de Uso
