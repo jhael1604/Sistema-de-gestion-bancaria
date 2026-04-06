@@ -1,0 +1,110 @@
+@startuml
+
+title Sistema de Gestión Bancaria — Diagrama de Casos de Uso
+
+
+actor "Cajero" as cajero
+actor "Asesor Financiero" as asesor
+actor "Gerente de Sucursal" as gerente
+actor "Cliente" as cliente
+actor "Sistema Auditor" as auditor
+
+
+rectangle "Sistema de Gestión Bancaria" {
+
+    ' ── Casos de uso del Cajero ──────────────
+    usecase "Registrar cliente natural" as UC01
+    usecase "Registrar cliente empresarial" as UC02
+    usecase "Abrir cuenta\n(ahorros / corriente / crédito)" as UC03
+    usecase "Procesar depósito" as UC04
+    usecase "Procesar retiro" as UC05
+    usecase "Generar comprobante\nde transacción" as UC06
+    usecase "Validar documento\nde identidad" as UC07
+
+    ' ── Casos de uso del Asesor Financiero ───
+    usecase "Realizar transferencia\nentre cuentas" as UC08
+    usecase "Consultar información\nde cliente" as UC09
+    usecase "Bloquear cuenta" as UC10
+    usecase "Desbloquear cuenta" as UC11
+    usecase "Cambiar estado\nde transacción" as UC12
+    usecase "Asignar cliente\na cartera" as UC13
+
+    ' ── Casos de uso del Gerente ─────────────
+    usecase "Aprobar crédito" as UC14
+    usecase "Calcular nómina total" as UC15
+    usecase "Registrar empleado" as UC16
+    usecase "Calcular intereses\nmensuales" as UC17
+    usecase "Calcular salario\nde empleado" as UC18
+
+    ' ── Casos de uso del Cliente ─────────────
+    usecase "Recibir notificación\nde movimiento" as UC19
+    usecase "Consultar saldo" as UC20
+    usecase "Consultar historial\nde transacciones" as UC21
+
+    ' ── Casos de uso del Auditor ─────────────
+    usecase "Consultar fecha\nde creación de entidad" as UC22
+    usecase "Consultar última\nmodificación" as UC23
+    usecase "Consultar usuario\nde modificación" as UC24
+
+    ' ── Casos de uso include/extend ──────────
+    usecase "Verificar capacidad\ndel sistema" as UC25
+    usecase "Validar saldo\ndisponible" as UC26
+    usecase "Verificar cuenta\nbloqueada" as UC27
+}
+
+
+cajero --> UC01
+cajero --> UC02
+cajero --> UC03
+cajero --> UC04
+cajero --> UC05
+cajero --> UC06
+
+UC01 ..> UC07 : <<include>>
+UC02 ..> UC07 : <<include>>
+UC01 ..> UC25 : <<include>>
+UC02 ..> UC25 : <<include>>
+UC03 ..> UC25 : <<include>>
+UC04 ..> UC27 : <<include>>
+UC05 ..> UC27 : <<include>>
+UC05 ..> UC26 : <<include>>
+UC05 ..> UC06 : <<extend>>
+
+
+asesor --> UC08
+asesor --> UC09
+asesor --> UC10
+asesor --> UC11
+asesor --> UC12
+asesor --> UC13
+
+UC08 ..> UC26 : <<include>>
+UC08 ..> UC27 : <<include>>
+UC08 ..> UC06 : <<extend>>
+UC12 ..> UC27 : <<include>>
+
+
+gerente --> UC14
+gerente --> UC15
+gerente --> UC16
+gerente --> UC17
+gerente --> UC18
+
+UC16 ..> UC25 : <<include>>
+UC15 ..> UC18 : <<include>>
+
+cliente --> UC19
+cliente --> UC20
+cliente --> UC21
+
+UC04 ..> UC19 : <<extend>>
+UC05 ..> UC19 : <<extend>>
+UC08 ..> UC19 : <<extend>>
+
+
+auditor --> UC22
+auditor --> UC23
+auditor --> UC24
+
+}
+@enduml
